@@ -46,10 +46,10 @@
 
 namespace moveit_rviz_plugin
 {
-
 void MotionPlanningFrame::planButtonClicked()
 {
-  planning_display_->addBackgroundJob(boost::bind(&MotionPlanningFrame::computePlanButtonClicked, this), "compute plan");
+  planning_display_->addBackgroundJob(boost::bind(&MotionPlanningFrame::computePlanButtonClicked, this), "compute "
+                                                                                                         "plan");
 }
 
 void MotionPlanningFrame::executeButtonClicked()
@@ -69,7 +69,7 @@ void MotionPlanningFrame::planAndExecuteButtonClicked()
 
 void MotionPlanningFrame::stopButtonClicked()
 {
-  ui_->stop_button->setEnabled(false); // avoid clicking again
+  ui_->stop_button->setEnabled(false);  // avoid clicking again
   planning_display_->addBackgroundJob(boost::bind(&MotionPlanningFrame::computeStopButtonClicked, this), "stop");
 }
 
@@ -121,8 +121,7 @@ void MotionPlanningFrame::computePlanButtonClicked()
     ui_->execute_button->setEnabled(true);
 
     // Success
-    ui_->result_label->setText(QString("Time: ").append(
-        QString::number(current_plan_->planning_time_,'f',3)));
+    ui_->result_label->setText(QString("Time: ").append(QString::number(current_plan_->planning_time_, 'f', 3)));
   }
   else
   {
@@ -138,8 +137,8 @@ void MotionPlanningFrame::computeExecuteButtonClicked()
 {
   if (move_group_ && current_plan_)
   {
-    ui_->stop_button->setEnabled(true); // enable stopping
-    bool success = move_group_->execute(*current_plan_);
+    ui_->stop_button->setEnabled(true);  // enable stopping
+    bool success = move_group_->execute(*current_plan_) == moveit::planning_interface::MoveItErrorCode::SUCCESS;
     onFinishedExecution(success);
   }
 }
@@ -153,7 +152,7 @@ void MotionPlanningFrame::computePlanAndExecuteButtonClicked()
   // to suppress a warning, we pass an empty state (which encodes "start from current state")
   move_group_->setStartStateToCurrentState();
   ui_->stop_button->setEnabled(true);
-  bool success = move_group_->move();
+  bool success = move_group_->move() == moveit::planning_interface::MoveItErrorCode::SUCCESS;
   onFinishedExecution(success);
   ui_->plan_and_execute_button->setEnabled(true);
 }
@@ -167,22 +166,26 @@ void MotionPlanningFrame::computeStopButtonClicked()
 void MotionPlanningFrame::onFinishedExecution(bool success)
 {
   // visualize result of execution
-  if (success) 
+  if (success)
     ui_->result_label->setText("Executed");
-  else 
+  else
     ui_->result_label->setText(!ui_->stop_button->isEnabled() ? "Stopped" : "Failed");
   // disable stop button
   ui_->stop_button->setEnabled(false);
 
   // update query start state to current if neccessary
   if (ui_->start_state_selection->currentText() == "<current>")
-  {
-    ros::Duration(1).sleep();
     useStartStateButtonClicked();
-  }
 }
 
 void MotionPlanningFrame::useStartStateButtonClicked()
+{
+  // use background job: fetching the current state might take up to a second
+  planning_display_->addBackgroundJob(boost::bind(&MotionPlanningFrame::useStartStateButtonExec, this),  //
+                                      "update start state");
+}
+
+void MotionPlanningFrame::useStartStateButtonExec()
 {
   robot_state::RobotState start = *planning_display_->getQueryStartState();
   updateQueryStateHelper(start, ui_->start_state_selection->currentText().toStdString());
@@ -191,17 +194,25 @@ void MotionPlanningFrame::useStartStateButtonClicked()
 
 void MotionPlanningFrame::useGoalStateButtonClicked()
 {
+  // use background job: fetching the current state might take up to a second
+  planning_display_->addBackgroundJob(boost::bind(&MotionPlanningFrame::useGoalStateButtonExec, this),  //
+                                      "update goal state");
+}
+
+void MotionPlanningFrame::useGoalStateButtonExec()
+{
   robot_state::RobotState goal = *planning_display_->getQueryGoalState();
   updateQueryStateHelper(goal, ui_->goal_state_selection->currentText().toStdString());
   planning_display_->setQueryGoalState(goal);
 }
 
-void MotionPlanningFrame::updateQueryStateHelper(robot_state::RobotState &state, const std::string &v)
+void MotionPlanningFrame::updateQueryStateHelper(robot_state::RobotState& state, const std::string& v)
 {
   if (v == "<random>")
   {
     configureWorkspace();
-    if (const robot_model::JointModelGroup *jmg = state.getJointModelGroup(planning_display_->getCurrentPlanningGroup()))
+    if (const robot_model::JointModelGroup* jmg =
+            state.getJointModelGroup(planning_display_->getCurrentPlanningGroup()))
       state.setToRandomPositions(jmg);
     return;
   }
@@ -210,24 +221,24 @@ void MotionPlanningFrame::updateQueryStateHelper(robot_state::RobotState &state,
   {
     configureWorkspace();
 
-    if (const robot_model::JointModelGroup *jmg =
-        state.getJointModelGroup(planning_display_->getCurrentPlanningGroup()))
+    if (const robot_model::JointModelGroup* jmg =
+            state.getJointModelGroup(planning_display_->getCurrentPlanningGroup()))
     {
       // Loop until a collision free state is found
       static const int MAX_ATTEMPTS = 100;
-      int attempt_count = 0; // prevent loop for going forever
+      int attempt_count = 0;  // prevent loop for going forever
       while (attempt_count < MAX_ATTEMPTS)
       {
         // Generate random state
         state.setToRandomPositions(jmg);
 
-        state.update(); // prevent dirty transforms
+        state.update();  // prevent dirty transforms
 
         // Test for collision
         if (planning_display_->getPlanningSceneRO()->isStateValid(state, "", false))
           break;
 
-        attempt_count ++;
+        attempt_count++;
       }
       // Explain if no valid rand state found
       if (attempt_count >= MAX_ATTEMPTS)
@@ -242,7 +253,8 @@ void MotionPlanningFrame::updateQueryStateHelper(robot_state::RobotState &state,
 
   if (v == "<current>")
   {
-    const planning_scene_monitor::LockedPlanningSceneRO &ps = planning_display_->getPlanningSceneRO();
+    planning_display_->waitForCurrentRobotState();
+    const planning_scene_monitor::LockedPlanningSceneRO& ps = planning_display_->getPlanningSceneRO();
     if (ps)
       state = ps->getCurrentState();
     return;
@@ -261,11 +273,11 @@ void MotionPlanningFrame::updateQueryStateHelper(robot_state::RobotState &state,
   }
 
   // maybe it is a named state
-  if (const robot_model::JointModelGroup *jmg = state.getJointModelGroup(planning_display_->getCurrentPlanningGroup()))
+  if (const robot_model::JointModelGroup* jmg = state.getJointModelGroup(planning_display_->getCurrentPlanningGroup()))
     state.setToDefaultValues(jmg, v);
 }
 
-void MotionPlanningFrame::populatePlannersList(const moveit_msgs::PlannerInterfaceDescription &desc)
+void MotionPlanningFrame::populatePlannersList(const moveit_msgs::PlannerInterfaceDescription& desc)
 {
   std::string group = planning_display_->getCurrentPlanningGroup();
   ui_->planning_algorithm_combo_box->clear();
@@ -277,49 +289,50 @@ void MotionPlanningFrame::populatePlannersList(const moveit_msgs::PlannerInterfa
   bool found_group = false;
   // the name of a planner is either "GROUP[planner_id]" or "planner_id"
   if (!group.empty())
-    for (std::size_t i = 0 ; i < desc.planner_ids.size() ; ++i)
+    for (std::size_t i = 0; i < desc.planner_ids.size(); ++i)
       if (desc.planner_ids[i] == group)
         found_group = true;
-      else
-        if (desc.planner_ids[i].substr(0, group.length()) == group)
+      else if (desc.planner_ids[i].substr(0, group.length()) == group)
+      {
+        if (desc.planner_ids[i].size() > group.length() && desc.planner_ids[i][group.length()] == '[')
         {
-          if (desc.planner_ids[i].size() > group.length() && desc.planner_ids[i][group.length()] == '[')
+          std::string id = desc.planner_ids[i].substr(group.length());
+          if (id.size() > 2)
           {
-            std::string id = desc.planner_ids[i].substr(group.length());
-            if (id.size() > 2)
-            {
-              id.resize(id.length() - 1);
-              ui_->planning_algorithm_combo_box->addItem(QString::fromStdString(id.substr(1)));
-            }
+            id.resize(id.length() - 1);
+            ui_->planning_algorithm_combo_box->addItem(QString::fromStdString(id.substr(1)));
           }
         }
+      }
   if (ui_->planning_algorithm_combo_box->count() == 0 && !found_group)
-    for (std::size_t i = 0 ; i < desc.planner_ids.size() ; ++i)
+    for (std::size_t i = 0; i < desc.planner_ids.size(); ++i)
       ui_->planning_algorithm_combo_box->addItem(QString::fromStdString(desc.planner_ids[i]));
   ui_->planning_algorithm_combo_box->insertItem(0, "<unspecified>");
 
   // retrieve default planner config from parameter server
   const std::string& default_planner_config = move_group_->getDefaultPlannerId(found_group ? group : std::string());
   int defaultIndex = ui_->planning_algorithm_combo_box->findText(QString::fromStdString(default_planner_config));
-  if (defaultIndex < 0) defaultIndex = 0; // 0 is <unspecified> fallback
+  if (defaultIndex < 0)
+    defaultIndex = 0;  // 0 is <unspecified> fallback
   ui_->planning_algorithm_combo_box->setCurrentIndex(defaultIndex);
 }
 
 void MotionPlanningFrame::populateConstraintsList()
 {
   if (move_group_)
-    planning_display_->addMainLoopJob(boost::bind(&MotionPlanningFrame::populateConstraintsList, this, move_group_->getKnownConstraints()));
+    planning_display_->addMainLoopJob(
+        boost::bind(&MotionPlanningFrame::populateConstraintsList, this, move_group_->getKnownConstraints()));
 }
 
-void MotionPlanningFrame::populateConstraintsList(const std::vector<std::string> &constr)
+void MotionPlanningFrame::populateConstraintsList(const std::vector<std::string>& constr)
 {
   ui_->path_constraints_combo_box->clear();
   ui_->path_constraints_combo_box->addItem("None");
-  for (std::size_t i = 0 ; i < constr.size() ; ++i)
+  for (std::size_t i = 0; i < constr.size(); ++i)
     ui_->path_constraints_combo_box->addItem(QString::fromStdString(constr[i]));
 }
 
-void MotionPlanningFrame::constructPlanningRequest(moveit_msgs::MotionPlanRequest &mreq)
+void MotionPlanningFrame::constructPlanningRequest(moveit_msgs::MotionPlanRequest& mreq)
 {
   mreq.group_name = planning_display_->getCurrentPlanningGroup();
   mreq.num_planning_attempts = ui_->planning_attempts->value();
@@ -334,7 +347,7 @@ void MotionPlanningFrame::constructPlanningRequest(moveit_msgs::MotionPlanReques
   mreq.workspace_parameters.max_corner.y = ui_->wcenter_y->value() + ui_->wsize_y->value() / 2.0;
   mreq.workspace_parameters.max_corner.z = ui_->wcenter_z->value() + ui_->wsize_z->value() / 2.0;
   robot_state::RobotStateConstPtr s = planning_display_->getQueryGoalState();
-  const robot_state::JointModelGroup *jmg = s->getJointModelGroup(mreq.group_name);
+  const robot_state::JointModelGroup* jmg = s->getJointModelGroup(mreq.group_name);
   if (jmg)
   {
     mreq.goal_constraints.resize(1);
@@ -356,27 +369,26 @@ void MotionPlanningFrame::configureWorkspace()
   bz.max_position_ = ui_->wcenter_z->value() + ui_->wsize_z->value() / 2.0;
 
   if (move_group_)
-    move_group_->setWorkspace(bx.min_position_, by.min_position_, bz.min_position_,
-                              bx.max_position_, by.max_position_, bz.max_position_);
+    move_group_->setWorkspace(bx.min_position_, by.min_position_, bz.min_position_, bx.max_position_, by.max_position_,
+                              bz.max_position_);
   planning_scene_monitor::PlanningSceneMonitorPtr psm = planning_display_->getPlanningSceneMonitor();
   // get non-const access to the kmodel and update planar & floating joints as indicated by the workspace settings
   if (psm && psm->getRobotModelLoader() && psm->getRobotModelLoader()->getModel())
   {
-    const robot_model::RobotModelPtr &kmodel = psm->getRobotModelLoader()->getModel();
-    const std::vector<robot_model::JointModel*> &jm = kmodel->getJointModels();
-    for (std::size_t i = 0 ; i < jm.size() ; ++i)
+    const robot_model::RobotModelPtr& kmodel = psm->getRobotModelLoader()->getModel();
+    const std::vector<robot_model::JointModel*>& jm = kmodel->getJointModels();
+    for (std::size_t i = 0; i < jm.size(); ++i)
       if (jm[i]->getType() == robot_model::JointModel::PLANAR)
       {
         jm[i]->setVariableBounds(jm[i]->getName() + "/" + jm[i]->getLocalVariableNames()[0], bx);
         jm[i]->setVariableBounds(jm[i]->getName() + "/" + jm[i]->getLocalVariableNames()[1], by);
       }
-      else
-        if (jm[i]->getType() == robot_model::JointModel::FLOATING)
-        {
-          jm[i]->setVariableBounds(jm[i]->getName() + "/" + jm[i]->getLocalVariableNames()[0], bx);
-          jm[i]->setVariableBounds(jm[i]->getName() + "/" + jm[i]->getLocalVariableNames()[1], by);
-          jm[i]->setVariableBounds(jm[i]->getName() + "/" + jm[i]->getLocalVariableNames()[2], bz);
-        }
+      else if (jm[i]->getType() == robot_model::JointModel::FLOATING)
+      {
+        jm[i]->setVariableBounds(jm[i]->getName() + "/" + jm[i]->getLocalVariableNames()[0], bx);
+        jm[i]->setVariableBounds(jm[i]->getName() + "/" + jm[i]->getLocalVariableNames()[1], by);
+        jm[i]->setVariableBounds(jm[i]->getName() + "/" + jm[i]->getLocalVariableNames()[2], bz);
+      }
   }
 }
 
@@ -389,6 +401,8 @@ void MotionPlanningFrame::configureForPlanning()
   move_group_->setMaxVelocityScalingFactor(ui_->velocity_scaling_factor->value());
   move_group_->setMaxAccelerationScalingFactor(ui_->acceleration_scaling_factor->value());
   configureWorkspace();
+  if (static_cast<bool>(planning_display_))
+    planning_display_->dropVisualizedTrajectory();
 }
 
 void MotionPlanningFrame::remotePlanCallback(const std_msgs::EmptyConstPtr& msg)
@@ -405,11 +419,11 @@ void MotionPlanningFrame::remoteUpdateStartStateCallback(const std_msgs::EmptyCo
 {
   if (move_group_ && planning_display_)
   {
-    robot_state::RobotState state = *planning_display_->getQueryStartState();
-    const planning_scene_monitor::LockedPlanningSceneRO &ps = planning_display_->getPlanningSceneRO();
+    planning_display_->waitForCurrentRobotState();
+    const planning_scene_monitor::LockedPlanningSceneRO& ps = planning_display_->getPlanningSceneRO();
     if (ps)
     {
-      state = ps->getCurrentState();
+      robot_state::RobotState state = ps->getCurrentState();
       planning_display_->setQueryStartState(state);
     }
   }
@@ -419,15 +433,13 @@ void MotionPlanningFrame::remoteUpdateGoalStateCallback(const std_msgs::EmptyCon
 {
   if (move_group_ && planning_display_)
   {
-    robot_state::RobotState state = *planning_display_->getQueryStartState();
-    const planning_scene_monitor::LockedPlanningSceneRO &ps = planning_display_->getPlanningSceneRO();
+    planning_display_->waitForCurrentRobotState();
+    const planning_scene_monitor::LockedPlanningSceneRO& ps = planning_display_->getPlanningSceneRO();
     if (ps)
     {
-      state = ps->getCurrentState();
+      robot_state::RobotState state = ps->getCurrentState();
       planning_display_->setQueryGoalState(state);
     }
   }
 }
-
-
 }
