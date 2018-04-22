@@ -2,6 +2,35 @@
 Changelog for package chomp_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.9.11 (2017-12-25)
+-------------------
+
+0.9.10 (2017-12-09)
+-------------------
+
+0.9.9 (2017-08-06)
+------------------
+* [improve] Chomp use PlanningScene (`#546 <https://github.com/ros-planning/moveit/issues/546>`_) to partially address `#305 <https://github.com/ros-planning/moveit/issues/305>`_
+* Contributors: Simon Schmeisser
+
+0.9.8 (2017-06-21)
+------------------
+
+0.9.7 (2017-06-05)
+------------------
+
+0.9.6 (2017-04-12)
+------------------
+
+0.9.5 (2017-03-08)
+------------------
+
+0.9.4 (2017-02-06)
+------------------
+
+0.9.3 (2016-11-16)
+------------------
+
 0.9.2 (2016-11-05)
 ------------------
 * [Maintenance] Auto format codebase using clang-format (`#284 <https://github.com/ros-planning/moveit/issues/284>`_)

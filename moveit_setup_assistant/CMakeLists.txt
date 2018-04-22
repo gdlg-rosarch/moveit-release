@@ -3,6 +3,9 @@ project(moveit_setup_assistant)
 
 add_compile_options(-std=c++11)
 
+# definition needed for boost/math/constants/constants.hpp included by Ogre to compile
+add_definitions(-DBOOST_MATH_DISABLE_FLOAT128)
+
 if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
@@ -10,7 +13,7 @@ endif()
 include_directories(include)
 
 find_package(Boost REQUIRED COMPONENTS thread filesystem system program_options)
-include_directories(SYSTEM ${Boost_INCLUDE_DIR})
+include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 
 find_package(catkin REQUIRED COMPONENTS
@@ -80,6 +83,9 @@ set(HEADERS
 add_library(${PROJECT_NAME}_tools
   src/tools/compute_default_collisions.cpp
   src/tools/moveit_config_data.cpp
+  src/tools/collision_linear_model.cpp
+  src/tools/collision_matrix_model.cpp
+  src/tools/rotated_header_view.cpp
 )
 set_target_properties(${PROJECT_NAME}_tools PROPERTIES VERSION ${${PROJECT_NAME}_VERSION})
 target_link_libraries(${PROJECT_NAME}_tools

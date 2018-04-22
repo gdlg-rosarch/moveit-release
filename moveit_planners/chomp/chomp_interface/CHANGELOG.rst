@@ -2,6 +2,44 @@
 Changelog for package chomp_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.9.11 (2017-12-25)
+-------------------
+
+0.9.10 (2017-12-09)
+-------------------
+* [package.xml] Update maintainers (Add a release-maintainer etc.)
+  For the reasoning, see https://github.com/ros-planning/moveit/issues/259
+* Contributors: Isaac I.Y. Saito
+
+0.9.9 (2017-08-06)
+------------------
+* [improve] Chomp use PlanningScene (`#546 <https://github.com/ros-planning/moveit/issues/546>`_) to partially address `#305 <https://github.com/ros-planning/moveit/issues/305>`_
+* Contributors: Simon Schmeisser
+
+0.9.8 (2017-06-21)
+------------------
+
+0.9.7 (2017-06-05)
+------------------
+
+0.9.6 (2017-04-12)
+------------------
+
+0.9.5 (2017-03-08)
+------------------
+
+0.9.4 (2017-02-06)
+------------------
+* [maintenance] clang-format upgraded to 3.8 (`#367 <https://github.com/ros-planning/moveit/issues/367>`_)
+* Contributors: Dave Coleman
+
+0.9.3 (2016-11-16)
+------------------
+* Merge pull request `#330 <https://github.com/ros-planning/moveit/issues/330>`_ from davetcoleman/kinetic-package.xml
+  Updated package.xml maintainers and author emails
+* Updated package.xml maintainers and author emails
+* Contributors: Dave Coleman, Ian McMahon
+
 0.9.2 (2016-11-05)
 ------------------
 

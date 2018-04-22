@@ -17,6 +17,7 @@ find_package(Boost REQUIRED COMPONENTS
 )
 find_package(PythonLibs 2.7 REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
+  moveit_msgs
   moveit_ros_planning
   moveit_ros_warehouse
   moveit_ros_manipulation
@@ -62,11 +63,11 @@ catkin_package(
 )
 
 include_directories(${THIS_PACKAGE_INCLUDE_DIRS}
+                    ${Boost_INCLUDE_DIRS}
                     ${catkin_INCLUDE_DIRS})
 
 include_directories(SYSTEM
                     ${EIGEN3_INCLUDE_DIRS}
-                    ${Boost_INCLUDE_DIRS}
                     ${PYTHON_INCLUDE_DIRS})
 
 link_directories(${Boost_LIBRARY_DIRS})

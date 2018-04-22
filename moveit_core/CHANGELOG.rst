@@ -2,6 +2,72 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.9.11 (2017-12-25)
+-------------------
+* [fix] #723; attached bodies are not shown in trajectory visualization anymore `#724 <https://github.com/ros-planning/moveit/issues/724>`_
+* [fix] Shortcomings in kinematics plugins `#714 <https://github.com/ros-planning/moveit/issues/714>`_
+* Contributors: Henning Kayser, Michael Görner, Robert Haschke
+
+0.9.10 (2017-12-09)
+-------------------
+* [fix] Add missing logWarn argument (`#707 <https://github.com/ros-planning/moveit/issues/707>`_)
+* [fix] IKConstraintSampler: Fixed transform from end-effector to ik chain tip. `#582 <https://github.com/ros-planning/moveit/issues/582>`_
+* [fix] robotStateMsgToRobotState: is_diff==true => not empty `#589 <https://github.com/ros-planning/moveit/issues/589>`_
+* [capability] Multi DOF Trajectory only providing translation not velocity (`#555 <https://github.com/ros-planning/moveit/issues/555>`_)
+* [capability] Adds parameter lookup function for kinematics plugins (`#701 <https://github.com/ros-planning/moveit/issues/701>`_)
+* [improve] Make operator bool() explicit `#696 <https://github.com/ros-planning/moveit/pull/696>`_
+* [improve] Get msgs from Planning Scene `#663 <https://github.com/ros-planning/moveit/issues/663>`_
+* [improve] moveit_core: export DEPENDS on LIBFCL `#632 https://github.com/ros-planning/moveit/pull/632>`_
+* [improve] RobotState: Changed multi-waypoint version of computeCartesianPath to test joint space jumps after all waypoints are generated. (`#576 <https://github.com/ros-planning/moveit/issues/576>`_)
+* [improve] Better debug output for IK tip frames (`#603 <https://github.com/ros-planning/moveit/issues/603>`_)
+* [improve] New debug console colors YELLOW PURPLE (`#604 <https://github.com/ros-planning/moveit/issues/604>`_)
+* Contributors: Dave Coleman, Dennis Hartmann, Henning Kayser, Isaac I.Y. Saito, Jorge Nicho, Michael Görner, Phil, Sarah Elliott, Simon Schmeisser, TroyCordie, v4hn
+
+0.9.9 (2017-08-06)
+------------------
+* [fix][moveit_core] segfault due to missing string format parameter. (`#547 <https://github.com/ros-planning/moveit/issues/547>`_)
+* [fix][moveit_core] doc-comment for robot_state::computeAABB (`#516 <https://github.com/ros-planning/moveit/issues/516>`_) 
+* Contributors: Martin Pecka, henhenhen
+
+0.9.8 (2017-06-21)
+------------------
+
+0.9.7 (2017-06-05)
+------------------
+* [fix] checks for empty name arrays messages before parsing the robot state message data (`#499 <https://github.com/ros-planning/moveit/issues/499>`_)
+* Contributors: Jorge Nicho, Michael Goerner
+
+0.9.6 (2017-04-12)
+------------------
+* [fix] PlanarJointModel::getVariableRandomPositionsNearBy (`#464 <https://github.com/ros-planning/moveit/issues/464>`_)
+* Contributors: Tamaki Nishino
+
+0.9.5 (2017-03-08)
+------------------
+* [fix][moveit_ros_warehouse] gcc6 build error `#423 <https://github.com/ros-planning/moveit/pull/423>`_ 
+* [enhancement] Remove "catch (...)" instances, catch std::exception instead of std::runtime_error (`#445 <https://github.com/ros-planning/moveit/issues/445>`_)
+* Contributors: Bence Magyar, Dave Coleman
+
+0.9.4 (2017-02-06)
+------------------
+* [fix] PlanningScene: Don't reset color information of existing objects when new entries are added (`#410 <https://github.com/ros-planning/moveit/issues/410>`_)
+* [fix] update link transforms in UnionConstraintSampler::project (`#384 <https://github.com/ros-planning/moveit/issues/384>`_)
+* [capability Addition of Set Joint Model Group Velocities and Accelerations Functions (`#402 <https://github.com/ros-planning/moveit/issues/402>`_)
+* [capability] time parameterization: use constants (`#380 <https://github.com/ros-planning/moveit/issues/380>`_)
+* [enhancement] multiple shapes in an attached collision object `#421 <https://github.com/ros-planning/moveit/pull/421>`_
+* [maintenance] Use static_cast to cast to const. (`#433 <https://github.com/ros-planning/moveit/issues/433>`_)
+* [maintenance] ompl_interface: uniform & simplified handling of the default planner (`#371 <https://github.com/ros-planning/moveit/issues/371>`_)
+* Contributors: Dave Coleman, Maarten de Vries, Michael Goerner, Mike Lautman, Ruben
+
+0.9.3 (2016-11-16)
+------------------
+* [fix] Replace unused service dependency with msg dep (`#361 <https://github.com/ros-planning/moveit/issues/361>`_)
+* [fix] cleanup urdfdom compatibility (`#319 <https://github.com/ros-planning/moveit/issues/319>`_)
+* [fix] Fix missing compatibility header for Wily `#364 <https://github.com/ros-planning/moveit/issues/364>`_)
+* [enhancement] Improved RobotState feedback for setFromIK() (`#342 <https://github.com/ros-planning/moveit/issues/342>`_)
+* [maintenance] Updated package.xml maintainers and author emails `#330 <https://github.com/ros-planning/moveit/issues/330>`_
+* Contributors: Dave Coleman, Ian McMahon, Robert Haschke
+
 0.9.2 (2016-11-05)
 ------------------
 * [Fix] CHANGELOG encoding for 0.9.1 (Fix `#318 <https://github.com/ros-planning/moveit/issues/318>`_). (`#327 <https://github.com/ros-planning/moveit/issues/327>`_)
